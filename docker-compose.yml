@@ -1,0 +1,29 @@
+services:
+  orbit:
+    build: .
+    container_name: orbit-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ORBIT_DOCKER_NETWORK: orbit-net
+      PORT: 3000
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - orbit-data:/app/.data
+    networks: [orbit-net]
+  desktop-image:
+    build:
+      context: .
+      dockerfile: Dockerfile.desktop
+    image: orbit-desktop:22.04
+    profiles: [build]
+networks:
+  orbit-net:
+    name: orbit-net
+volumes:
+  orbit-data:
