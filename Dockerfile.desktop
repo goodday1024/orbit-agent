@@ -1,0 +1,9 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+COPY docker/google-linux-signing-key.pub /tmp/google-linux-signing-key.pub
+RUN apt-get update && apt-get install -y --no-install-recommends xfce4 xfce4-terminal dbus-x11 x11-xserver-utils xvfb x11vnc novnc websockify python3 python3-pip curl wget git jq ca-certificates fonts-liberation fonts-noto-cjk supervisor gnupg && mkdir -p /etc/apt/keyrings && gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg /tmp/google-linux-signing-key.pub && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && apt-get update && apt-get install -y --no-install-recommends google-chrome-stable && rm -rf /var/lib/apt/lists/* /tmp/google-linux-signing-key.pub
+RUN apt-get update && apt-get install -y --no-install-recommends poppler-utils python3-openpyxl && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /run/orbit /home/orbit/Desktop /home/orbit/Downloads /home/orbit/.vnc && useradd -m -s /bin/bash orbit && echo 'orbit:orbit' | chpasswd && chown -R orbit:orbit /home/orbit
+COPY docker/supervisord.conf /etc/supervisor/conf.d/orbit.conf
+EXPOSE 6080
+CMD ["/usr/bin/supervisord", "-n"]
